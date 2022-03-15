@@ -3,6 +3,23 @@ const LOG_STD_MIN = -20
 const ϵ = 1e-8
 
 """
+Defines native softplus function to avoid CUDA bugs.
+"""
+softplus(x::Real) = x > 0 ? x + log(1 + exp(-x)) : log(1 + exp(x))
+CuModule.softplus(x::Real) = ifelse(x > 0, x + log1p(exp(-x)), log1p(exp(x)))
+
+"""
+Defines native relu function to avoid Flux bugs.
+"""
+relu(x::Real) = max(x, 0)
+
+"""
+Allows safe cross-version transfer of stored MLPActorCritic objects.
+"""
+struct NullRNG <: AbstractRNG end
+
+
+"""
 Creates multilayer perceptron with given parameters.
 """
 function mlp(sizes::Vector{Int}, activation::Function, output_activation::Function=identity)
@@ -185,18 +202,4 @@ function to_cpu!(x::Any, level::Int64=2)
     end
 end
 
-"""
-Defines native softplus function to avoid CUDA bugs.
-"""
-softplus(x::Real) = x > 0 ? x + log(1 + exp(-x)) : log(1 + exp(x))
-CuModule.softplus(x::Real) = ifelse(x > 0, x + log1p(exp(-x)), log1p(exp(x)))
 
-"""
-Defines native relu function to avoid Flux bugs.
-"""
-relu(x::Real) = max(x, 0)
-
-"""
-Allows safe cross-version transfer of stored MLPActorCritic objects.
-"""
-struct NullRNG <: AbstractRNG end
