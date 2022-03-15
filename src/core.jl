@@ -6,7 +6,7 @@ const ϵ = 1e-8
 Defines native softplus function to avoid CUDA bugs.
 """
 softplus(x::Real) = x > 0 ? x + log(1 + exp(-x)) : log(1 + exp(x))
-CuModule.softplus(x::Real) = ifelse(x > 0, x + log1p(exp(-x)), log1p(exp(x)))
+# CuModule.softplus(x::Real) = ifelse(x > 0, x + log1p(exp(-x)), log1p(exp(x)))
 
 """
 Defines native relu function to avoid Flux bugs.
