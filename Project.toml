@@ -1,5 +1,6 @@
 name = "SoftActorCritic_baseline"
 # uuid = "4431605d-f56c-43f7-b958-c314758684f6"
+uuid = "8f4eae10-a42b-11ec-0771-c7f3b7ea75d9"
 authors = ["Ritchie Lee <ritchie@ritchielee.net>", "Rory Lipkis <rorylipkis@gmail.com>"]
 version = "0.2.0"
 
