@@ -216,7 +216,7 @@ Base.@kwdef mutable struct SAC
     # Actor-critic network
     hidden_sizes::Vector{Int} = [100,100,100]       # dimensions of any hidden layers
     num_q::Int = 2                                  # size of critic ensemble
-    activation::Function = SoftActorCritic.relu     # activation after each hidden layer
+    activation::Function = SoftActorCritic_baseline.relu     # activation after each hidden layer
 
     # Training
     q_optimizer::Any = AdaBelief(1e-3)              # optimizer for value networks
