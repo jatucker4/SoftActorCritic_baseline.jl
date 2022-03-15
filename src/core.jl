@@ -1,5 +1,6 @@
 const LOG_STD_MAX = 2
 const LOG_STD_MIN = -20
+const ϵ = 1e-8
 
 """
 Creates multilayer perceptron with given parameters.
@@ -165,7 +166,8 @@ function Flux.Optimise.apply!(o::AdaBelief, x, Δ)
 	mt, st = get!(o.state, x, (zero(x), zero(x)))
 	@. mt = β[1] * mt + (1 - β[1]) * Δ
 	@. st = β[2] * st + (1 - β[2]) * (Δ - mt)^2
-	@. Δ =  η * mt / (√(st) + Flux.Optimise.ϵ)
+# 	@. Δ =  η * mt / (√(st) + Flux.Optimise.ϵ)
+	@. Δ =  η * mt / (√(st) + ϵ)
 	return Δ
 end
 
