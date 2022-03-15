@@ -1,4 +1,4 @@
-module SoftActorCritic
+module SoftActorCritic_baseline
 
 __precompile__(false)
 
