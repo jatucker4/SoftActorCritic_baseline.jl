@@ -122,10 +122,10 @@ function test_agent(
     rets = []
     stdevs = []
     dispvals = [[] for _ in displays]
-
+    reward_vec_outer = []
     # Perform rollouts
     for _ in 1:num_test_episodes
-
+        reward_vec_inner = []
         # Single trajectory from deterministic (mean) policy
         d, ep_ret, ep_len = false, 0.0, 0
         reset!(test_env)
@@ -136,12 +136,14 @@ function test_agent(
             r = act!(test_env, a)
             o = observe(test_env)
             d = terminated(test_env)
-            ep_ret += r
+            ep_ret += sum(r)
             ep_len += 1
             push!(stdevs, std(qs))
+            push!(reward_vec_inner, r)
         end
 
         # Compute custom statistics and add to collections
+        push!(reward_vec_outer,mean(reward_vec_inner))
         push!(rets, ep_ret)
         push!.(dispvals, f(test_env) for (_, f) in displays)
     end
@@ -149,7 +151,7 @@ function test_agent(
     # Average displayed values
     dispvals = [rets, stdevs, dispvals...]
     dispvals_avg = mean.(dispvals)
-    return dispvals_avg
+    return dispvals_avg, mean(reward_vec_outer)
 end
 
 """
@@ -271,13 +273,14 @@ function solve(sac::SAC)
     ep_ret, ep_len = 0.0, 0
     reset!(env)
     o = observe(env)
+    test_reward_vec = []
     for t in 1:total_steps
         # Choose action
     	random_policy = t <= sac.start_steps
     	a = random_policy ? rand(actions(env)) : ac(gpu(o)) |> cpu
 
         # Step environment
-        r = act!(env, a)
+        r = sum(act!(env, a))
         o2 = observe(env)
         d = terminated(env)
         ep_ret += r
@@ -310,11 +313,11 @@ function solve(sac::SAC)
         epoch = (t - 1) ÷ sac.steps_per_epoch + 1
         if t % sac.steps_per_epoch == 0
             # Update display values
-            dispvals = test_agent(ac, test_env, sac.displays, sac.max_ep_len, sac.num_test_episodes)
+            dispvals,test_reward  = test_agent(ac, test_env, sac.displays, sac.max_ep_len, sac.num_test_episodes)
             for ((_, hist), val) in zip(disptups, dispvals)
                 push!(hist, val)
             end
-
+            push!(test_reward_vec, test_reward)
             # Log info about epoch
             @debug("Evaluation",
             	  alpha[],
@@ -341,5 +344,5 @@ function solve(sac::SAC)
     end
     info["replay_buffer"] = replay_buffer
 
-    return ac, info, env
+    return ac, info, env, test_reward_vec
 end
